@@ -7,12 +7,10 @@ import pandas as pd
 from typing import Callable
 from scipy import stats
 
-import pdb
-
 
 def add_significance_indicator(
     fig: go.Figure,
-    same_color_only: bool = True,
+    same_color_only: bool = False,
     xval_pairs: list[tuple] | None = None,
     color_pairs: list[tuple] | None = None,
     stat_func: Callable = stats.ttest_ind,
@@ -176,7 +174,7 @@ def compute_stats(sdists: pd.DataFrame,
         else:
             # Build unique pairs accross the color groups
             if cp1 == cp2:
-                uxvals = sdists[(sdists.lgrp == cp1)].x.unique()
+                uxvals = sdists[(sdists.lgrp == cp1)].xlabel.unique()
                 wxval_pairs = [(x1, x2)
                                for i, x1 in enumerate(uxvals)
                                for x2 in uxvals[i + 1:]]
@@ -186,17 +184,22 @@ def compute_stats(sdists: pd.DataFrame,
                     (x1, x2)
                     for x1 in sdists[(sdists.lgrp == cp1)].xlabel.unique()
                     for x2 in sdists[(sdists.lgrp == cp2)].xlabel.unique()]
+
         for x1, x2 in wxval_pairs:
             if x1 != x2 or cp1 != cp2:
-                dist1 = sdists[(sdists.lgrp == cp1) &
-                               (sdists.xlabel == x1)].y.iloc[0]
-                dist2 = sdists[(sdists.lgrp == cp2) &
-                               (sdists.xlabel == x2)].y.iloc[0]
-                # print(f"{dist1=}, {dist2=}, {cp1=}, {cp2=}, {x1=}, {x2=}")
-                recs.append({'color1': cp1, 'color2': cp2, 'x1': x1, 'x2': x2,
-                             'stat': stat_func(dist1, dist2), 'n1': len(dist1),
-                             'n2': len(dist2)
-                             })
+                dist1 = sdists[(sdists.lgrp == cp1) & (sdists.xlabel == x1)]
+                dist2 = sdists[(sdists.lgrp == cp2) & (sdists.xlabel == x2)]
+
+                if True:  # dist1.shape[0] >= 1 and dist2.shape[0] >= 1:
+                    # print(f" >> {dist1=}, {dist2=}, {x1=}, {x2=}, {cp1=}, "
+                    # f"{cp2=}")
+                    recs.append({'color1': cp1, 'color2': cp2, 'x1': x1,
+                                 'x2': x2,
+                                 'stat': stat_func(dist1.y.iloc[0],
+                                                   dist2.y.iloc[0]),
+                                 'n1': len(dist1.y.iloc[0]),
+                                 'n2': len(dist2.y.iloc[0])
+                                 })
 
     return pd.DataFrame(recs)
 
