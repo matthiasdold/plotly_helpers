@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 
 
 def plot_roc_curve(y_true: np.ndarray, y_pred: np.ndarray) -> go.Figure:
+
     fpr, tpr, ths = metrics.roc_curve(y_true, y_pred)
     auc = metrics.auc(fpr, tpr)
 
@@ -13,14 +14,13 @@ def plot_roc_curve(y_true: np.ndarray, y_pred: np.ndarray) -> go.Figure:
     fig.add_traces(
         [
 
-            go.Scatter(x=[0, 1], y=[0, 1], mode='lines', name='chance',
-                       line_color='#888888'),
+            go.Scatter(x=[0, 1], y=[0, 1], mode='lines', line_color='#888888'),
             go.Scatter(x=fpr, y=tpr, mode='lines', line_color='#5555ff',
                        name='ROC', fill='tonexty'),
         ]
     )
 
-    fig.add_annotation(x=0.5, y=0.8, text=f"AUC={auc}")
+    fig.add_annotation(x=0.5, y=0.8, text=f"AUC={auc:.1%}")
 
     fig.update_layout(xaxis={'title': 'False Positive Rate'},
                       yaxis={'title': 'True Positive Rate'})
